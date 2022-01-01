@@ -1,0 +1,5 @@
+rootProject.name = 'Ducker'
+
+include('Executor')
+include('Arbiter')
+

@@ -1,0 +1,17 @@
+group 'net.minecraftforge'
+version '1.0-SNAPSHOT'
+
+subprojects { subproject ->
+    subproject.group = rootProject.group
+    subproject.version = rootProject.version
+
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'forge'
+            url = 'https://maven.minecraftforge.net/'
+        }
+    }
+}
