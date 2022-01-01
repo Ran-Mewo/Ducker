@@ -1,16 +1,14 @@
-package net.minecraftforge.mixin;
+package net.minecraftforge.ducker.mixin;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.asm.launch.IClassProcessor;
 import org.spongepowered.asm.launch.platform.container.ContainerHandleModLauncher;
-import org.spongepowered.asm.launch.platform.container.IContainerHandle;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformerFactory;
 import org.spongepowered.asm.service.*;
 import org.spongepowered.asm.service.modlauncher.*;
 import org.spongepowered.asm.util.IConsumer;
-import org.spongepowered.asm.util.ReEntranceLock;
 
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
@@ -18,25 +16,14 @@ import java.util.Collection;
 
 public final class DuckerExecutorMixinService extends MixinServiceAbstract
 {
-    private static final String MODLAUNCHER_4_SPECIFICATION_VERSION = "4.0";
-
-    /**
-     * Specification version for ModLauncher versions &gt;= 9.0.4, yes this is
-     * not a typo, the specification version (API version) is out of step with
-     * the artefact version in a few previous cases (ML6 has specification
-     * version 5.0 for example, and ML7 and ML8 both had specification version
-     * 7.0).
-     */
-    private static final String MODLAUNCHER_9_SPECIFICATION_VERSION = "8.0";
-
-    private static final String CONTAINER_PACKAGE = MixinServiceAbstract.LAUNCH_PACKAGE + "platform.container.";
-    private static final String MODLAUNCHER_4_ROOT_CONTAINER_CLASS = CONTAINER_PACKAGE + "ContainerHandleModLauncher";
-    private static final String MODLAUNCHER_9_ROOT_CONTAINER_CLASS = CONTAINER_PACKAGE + "ContainerHandleModLauncherEx";
+    private static final String DUCKER_MIXIN_PACKAGE = "net.minecraftforge.ducker.mixin";
+    private static final String CONTAINER_PACKAGE = DUCKER_MIXIN_PACKAGE + "container.";
+    private static final String ROOT_CONTAINER_CLASS = CONTAINER_PACKAGE + "ContainerHandleDucker";
 
     /**
      * Class provider, either uses hacky internals or provided service
      */
-    private IClassProvider classProvider;
+    private DuckerClasspathClassProvider classProvider;
 
     /**
      * Bytecode provider, either uses hacky internals or provided service
@@ -46,7 +33,7 @@ public final class DuckerExecutorMixinService extends MixinServiceAbstract
     /**
      * Container for the mixin pipeline which is called by the launch plugin
      */
-    private MixinTransformationHandler transformationHandler;
+    private DuckerTransformationHandler transformationHandler;
 
     /**
      * Class tracker, tracks class loads and registered invalid classes
@@ -80,7 +67,7 @@ public final class DuckerExecutorMixinService extends MixinServiceAbstract
 
     public DuckerExecutorMixinService() {
         this.minCompatibilityLevel = MixinEnvironment.CompatibilityLevel.JAVA_16;
-        this.createRootContainer(MixinServiceModLauncher.MODLAUNCHER_9_ROOT_CONTAINER_CLASS);
+        this.createRootContainer(ROOT_CONTAINER_CLASS);
     }
 
     /**
@@ -156,15 +143,6 @@ public final class DuckerExecutorMixinService extends MixinServiceAbstract
      */
     @Override
     public boolean isValid() {
-        try {
-            Launcher.INSTANCE.hashCode();
-            final Package pkg = ITransformationService.class.getPackage();
-            if (!pkg.isCompatibleWith(MixinServiceModLauncher.MODLAUNCHER_4_SPECIFICATION_VERSION)) {
-                return false;
-            }
-        } catch (Throwable th) {
-            return false;
-        }
         return true;
     }
 
@@ -173,8 +151,12 @@ public final class DuckerExecutorMixinService extends MixinServiceAbstract
      */
     @Override
     public IClassProvider getClassProvider() {
+        return getClassPathProvider();
+    }
+
+    public DuckerClasspathClassProvider getClassPathProvider() {
         if (this.classProvider == null) {
-            this.classProvider = new ModLauncherClassProvider();
+            this.classProvider = new DuckerClasspathClassProvider();
         }
         return this.classProvider;
     }
@@ -223,9 +205,9 @@ public final class DuckerExecutorMixinService extends MixinServiceAbstract
     /**
      * Get (or create) the transformation handler
      */
-    private MixinTransformationHandler getTransformationHandler() {
+    private DuckerTransformationHandler getTransformationHandler() {
         if (this.transformationHandler == null) {
-            this.transformationHandler = new MixinTransformationHandler();
+            this.transformationHandler = new DuckerTransformationHandler();
         }
         return this.transformationHandler;
     }
