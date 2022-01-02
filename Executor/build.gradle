@@ -61,4 +61,37 @@ tasks.withType(Test).configureEach {testTask ->
     diggerProjects.forEach {diggerProject ->
         testTask.dependsOn diggerProject.tasks.getByName("setupTestEnvironment")
     }
+
+    doFirst {
+        def outputDirectory = project.file("src/test/output");
+        if (outputDirectory.exists()) {
+            outputDirectory.delete();
+        }
+    }
+}
+
+tasks.clean.doLast {
+    def testRuntimesDirectory = project.file("src/test/resources/runtimes");
+    if (testRuntimesDirectory.exists()) {
+        deleteFolder(testRuntimesDirectory)
+    }
+
+    def outputDirectory = project.file("src/test/output");
+    if (outputDirectory.exists()) {
+        deleteFolder(outputDirectory)
+    }
+}
+
+static void deleteFolder(File folder) {
+    File[] files = folder.listFiles();
+    if(files!=null) { //some JVMs return null for empty dirs
+        for(File f: files) {
+            if(f.isDirectory()) {
+                deleteFolder(f);
+            } else {
+                f.delete();
+            }
+        }
+    }
+    folder.delete();
 }
