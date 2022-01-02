@@ -13,7 +13,7 @@ public class ContainerHandleDucker  extends ContainerHandleVirtual {
     /**
      * Container handle for nio resources offered by ModLauncher
      */
-    class Resource extends ContainerHandleURI {
+    static class Resource extends ContainerHandleURI {
 
         private String name;
         private Path path;

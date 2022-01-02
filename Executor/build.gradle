@@ -12,14 +12,6 @@ dependencies {
 
     api "com.google.guava:guava:${project.guava_version}"
 
-    api ("cpw.mods:modlauncher:${project.modlauncher_version}") {
-        exclude module: 'asm'
-        exclude module: 'asm-analysis'
-        exclude module: 'asm-commons'
-        exclude module: 'asm-tree'
-        exclude module: 'jopt-simple'
-    }
-
     api "org.ow2.asm:asm-tree:${project.asm_version}"
     api "org.ow2.asm:asm-commons:${project.asm_version}"
     api "org.ow2.asm:asm-util:${project.asm_version}"

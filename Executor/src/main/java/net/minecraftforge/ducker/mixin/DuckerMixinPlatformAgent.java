@@ -7,12 +7,12 @@ import org.spongepowered.asm.util.Constants;
 
 import java.util.Collection;
 
+@SuppressWarnings("unused") //Loaded via reflection.
 public class DuckerMixinPlatformAgent extends MixinPlatformAgentAbstract implements IMixinPlatformServiceAgent
 {
     @Override
     public void init()
     {
-
     }
 
     @Override
