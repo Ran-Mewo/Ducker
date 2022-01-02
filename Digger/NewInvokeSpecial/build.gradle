@@ -1,0 +1,10 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+version = "1.0"
+
+dependencies {
+
+}

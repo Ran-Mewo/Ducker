@@ -18,7 +18,6 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.logging.Level;
-import org.spongepowered.asm.mixin.transformer.debug.RuntimeDecompiler;
 import org.spongepowered.asm.service.MixinService;
 import org.spongepowered.asm.util.asm.ASM;
 
@@ -36,7 +35,7 @@ class ExecutorServiceTest
 {
 
     @Test
-    void execute()
+    void executeSimple()
     {
         final File output = new File("src/test/output/classes/simplesource");
         final File sources = new File("src/test/output/sources/simplesource");
@@ -46,6 +45,21 @@ class ExecutorServiceTest
           "src/test/resources/runtimes/SimpleSource - Source/SimpleSource - Source-1.0.jar",
           Collections.singletonList("src/test/resources/runtimes/SimpleSource - Mixin/SimpleSource - Mixin-1.0.jar"),
           "net.minecraftforge.ducker.digger.simplesource", new TestClassWriter(output), new TestDecompiler(sources));
+
+        ExecutorService.getInstance().execute(configuration);
+    }
+
+    @Test
+    void executeNewInvokeSpecial()
+    {
+        final File output = new File("src/test/output/classes/newinvokespecial");
+        final File sources = new File("src/test/output/sources/newinvokespecial");
+
+        final DuckerConfiguration configuration = new DuckerConfiguration(
+          Collections.emptyList(),
+          "src/test/resources/runtimes/NewInvokeSpecial - Source/NewInvokeSpecial - Source-1.0.jar",
+          Collections.singletonList("src/test/resources/runtimes/NewInvokeSpecial - Mixin/NewInvokeSpecial - Mixin-1.0.jar"),
+          "net.minecraftforge.ducker.digger.newinvokespecial", new TestClassWriter(output), new TestDecompiler(sources));
 
         ExecutorService.getInstance().execute(configuration);
     }

@@ -76,9 +76,6 @@ public final class DuckerExecutorMixinService extends MixinServiceAbstract
      * @param bytecodeProvider bytecode provider
      */
     public void onInit(IClassBytecodeProvider bytecodeProvider) {
-        if (this.initialised) {
-            throw new IllegalStateException("Already initialised");
-        }
         this.initialised = true;
         this.bytecodeProvider = bytecodeProvider;
     }
