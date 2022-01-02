@@ -13,7 +13,9 @@ import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformerFactory;
 import org.spongepowered.asm.service.ISyntheticClassRegistry;
 
+import java.lang.reflect.Field;
 import java.util.EnumSet;
+import java.util.UUID;
 
 public class DuckerTransformationHandler implements IClassProcessor {
 
@@ -81,6 +83,21 @@ public class DuckerTransformationHandler implements IClassProcessor {
                 throw new IllegalStateException("processClass called before transformer factory offered to transformation handler");
             }
             this.transformer = this.transformerFactory.createTransformer();
+
+            try
+            {
+                final Field processorField = this.transformer.getClass().getDeclaredField("processor");
+                processorField.setAccessible(true);
+                final Class<?> processorClass = processorField.getType();
+                final Field field = processorClass.getDeclaredField("sessionId");
+                field.setAccessible(true);
+                field.set(processorField.get(this.transformer), "Ducker Static Mixin Transformer");
+            }
+            catch (NoSuchFieldException | IllegalAccessException e)
+            {
+                e.printStackTrace();
+            }
+
             this.registry = this.transformer.getExtensions().getSyntheticClassRegistry();
         }
 

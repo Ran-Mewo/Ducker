@@ -34,7 +34,7 @@ public class ContainerHandleDucker  extends ContainerHandleVirtual {
 
         @Override
         public String toString() {
-            return String.format("ContainerHandleModLauncher.Resource(%s:%s)", this.name, this.path);
+            return String.format("ContainerHandleDucker.Resource(%s:%s)", this.name, this.path);
         }
 
     }

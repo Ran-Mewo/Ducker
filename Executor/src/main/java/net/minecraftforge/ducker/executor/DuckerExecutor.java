@@ -15,9 +15,7 @@ import org.spongepowered.asm.transformers.MixinClassReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 public final class DuckerExecutor implements IClassBytecodeProvider {
@@ -32,7 +30,7 @@ public final class DuckerExecutor implements IClassBytecodeProvider {
         final DuckerClasspathClassProvider classProvider = duckerExecutorMixinService.getClassPathProvider();
 
         String classAsPath = name.replace('.', '/') + ".class";
-        InputStream stream = classProvider.getUrlClassLoader().getResourceAsStream(classAsPath);
+        InputStream stream = classProvider.getFullClassLoader().getResourceAsStream(classAsPath);
         try {
             return IOUtils.toByteArray(Objects.requireNonNull(stream));
         } catch (IOException e) {

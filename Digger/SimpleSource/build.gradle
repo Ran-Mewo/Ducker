@@ -3,6 +3,8 @@ plugins {
     id 'application'
 }
 
+version = "1.0"
+
 dependencies {
-    implementation project(':Executor')
+
 }

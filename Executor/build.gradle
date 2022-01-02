@@ -26,10 +26,39 @@ dependencies {
 
     api "commons-io:commons-io:${project.commons_io_version}"
 
+    api "com.google.code.gson:gson:${project.gson_version}"
+
+    api "net.minecraftforge:forgeflower:${project.forgeflower_version}"
+
     testImplementation "org.junit.jupiter:junit-jupiter-api:${project.junit_version}"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${project.junit_version}"
 }
 
 test {
     useJUnitPlatform()
+}
+
+// Setup testing environment
+// Create test target jars first.
+def executorProject = project
+def diggerProjects = rootProject.allprojects.findAll{project -> rootProject.projectDir.toPath().relativize(project.projectDir.toPath()).toString().startsWith("Digger")}
+diggerProjects.forEach {diggerProject ->
+    diggerProject.tasks.create("setupTestEnvironment", Copy) { setupTask ->
+        setupTask.from diggerProject.projectDir.toPath().resolve("build/libs").toFile()
+        setupTask.into executorProject.projectDir.toPath().resolve("src/test/resources/runtimes/${diggerProject.name}").toFile()
+
+        diggerProject.afterEvaluate {
+            setupTask.dependsOn diggerProject.tasks.getByName("build")
+        }
+
+        setupTask.description = "Copy ${diggerProject.name} jars to executors test resources"
+        setupTask.group = "verification"
+
+    }
+}
+
+tasks.withType(Test).configureEach {testTask ->
+    diggerProjects.forEach {diggerProject ->
+        testTask.dependsOn diggerProject.tasks.getByName("setupTestEnvironment")
+    }
 }

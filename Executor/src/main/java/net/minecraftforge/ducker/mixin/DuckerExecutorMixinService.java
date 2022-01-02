@@ -1,8 +1,8 @@
 package net.minecraftforge.ducker.mixin;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraftforge.ducker.mixin.container.ContainerHandleDucker;
 import org.spongepowered.asm.launch.IClassProcessor;
-import org.spongepowered.asm.launch.platform.container.ContainerHandleModLauncher;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.transformer.IMixinTransformerFactory;
@@ -16,7 +16,7 @@ import java.util.Collection;
 
 public final class DuckerExecutorMixinService extends MixinServiceAbstract
 {
-    private static final String DUCKER_MIXIN_PACKAGE = "net.minecraftforge.ducker.mixin";
+    private static final String DUCKER_MIXIN_PACKAGE = "net.minecraftforge.ducker.mixin.";
     private static final String CONTAINER_PACKAGE = DUCKER_MIXIN_PACKAGE + "container.";
     private static final String ROOT_CONTAINER_CLASS = CONTAINER_PACKAGE + "ContainerHandleDucker";
 
@@ -58,7 +58,7 @@ public final class DuckerExecutorMixinService extends MixinServiceAbstract
     /**
      * Root container
      */
-    private ContainerHandleModLauncher rootContainer;
+    private ContainerHandleDucker rootContainer;
 
     /**
      * Minimum compatibility level
@@ -87,7 +87,7 @@ public final class DuckerExecutorMixinService extends MixinServiceAbstract
         try {
             Class<?> clRootContainer = this.getClassProvider().findClass(rootContainerClassName);
             Constructor<?> ctor = clRootContainer.getDeclaredConstructor(String.class);
-            this.rootContainer = (ContainerHandleModLauncher)ctor.newInstance(this.getName());
+            this.rootContainer = (ContainerHandleDucker) ctor.newInstance(this.getName());
         } catch (ReflectiveOperationException ex) {
             ex.printStackTrace();
         }
@@ -121,7 +121,7 @@ public final class DuckerExecutorMixinService extends MixinServiceAbstract
      */
     @Override
     public String getName() {
-        return "ModLauncher";
+        return "Ducker";
     }
 
     /* (non-Javadoc)
@@ -218,7 +218,7 @@ public final class DuckerExecutorMixinService extends MixinServiceAbstract
     @Override
     public Collection<String> getPlatformAgents() {
         return ImmutableList.<String>of(
-          "org.spongepowered.asm.launch.platform.MixinPlatformAgentMinecraftForge"
+          DUCKER_MIXIN_PACKAGE + "DuckerMixinPlatformAgent"
         );
     }
 
@@ -226,7 +226,7 @@ public final class DuckerExecutorMixinService extends MixinServiceAbstract
      * @see org.spongepowered.asm.service.IMixinService#getPrimaryContainer()
      */
     @Override
-    public ContainerHandleModLauncher getPrimaryContainer() {
+    public ContainerHandleDucker getPrimaryContainer() {
         return this.rootContainer;
     }
 
@@ -236,7 +236,7 @@ public final class DuckerExecutorMixinService extends MixinServiceAbstract
      */
     @Override
     public InputStream getResourceAsStream(String name) {
-        return Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
+        return getClassPathProvider().getFullClassLoader().getResourceAsStream(name);
     }
 
     /**
@@ -248,5 +248,11 @@ public final class DuckerExecutorMixinService extends MixinServiceAbstract
           this.getTransformationHandler(),
           (IClassProcessor)this.getClassTracker()
         );
+    }
+
+    @Override
+    public MixinEnvironment.Phase getInitialPhase()
+    {
+        return MixinEnvironment.Phase.DEFAULT;
     }
 }

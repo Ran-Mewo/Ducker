@@ -2,4 +2,10 @@ rootProject.name = 'Ducker'
 
 include('Executor')
 include('Arbiter')
+include('SimpleSource')
+include('SimpleSourceMixin')
+project(':SimpleSource').projectDir = new File("Digger/SimpleSource")
+project(':SimpleSource').name = "SimpleSource - Source"
+project(':SimpleSourceMixin').projectDir = new File("Digger/SimpleSourceMixin")
+project(':SimpleSourceMixin').name = "SimpleSource - Mixin"
 

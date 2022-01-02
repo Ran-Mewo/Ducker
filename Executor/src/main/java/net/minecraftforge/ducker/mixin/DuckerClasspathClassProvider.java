@@ -9,48 +9,59 @@ import java.net.URLClassLoader;
 
 public class DuckerClasspathClassProvider implements IClassProvider, Closeable
 {
-    private URL[] classpathEntries = new URL[0];
-    private URLClassLoader urlClassLoader = new URLClassLoader("Ducker dummy", classpathEntries, this.getClassPath().getClass().getClassLoader());
+    private URL[]          fullClassPathEntries     = new URL[0];
+    private URLClassLoader fullClassPathClassLoader = new URLClassLoader("Ducker dummy", fullClassPathEntries, this.getClass().getClassLoader());
+    private URL[] runtimeClassPathEntries = new URL[0];
+    private URLClassLoader runtimeClassPathClassLoader = new URLClassLoader("Ducker runtime dummy", runtimeClassPathEntries, this.getClass().getClassLoader());
 
     public DuckerClasspathClassProvider() {
     }
 
-    public void setup(final URL[] classpathEntries) {
-        this.classpathEntries = classpathEntries;
-        this.urlClassLoader = new URLClassLoader("Ducker runtime", classpathEntries, this.getClass().getClassLoader());
+    public void setup(final URL[] classpathEntries, final URL[] runtimeClassPathEntries) {
+        this.fullClassPathEntries = classpathEntries;
+        this.fullClassPathClassLoader = new URLClassLoader("Ducker full runtime", classpathEntries, this.getClass().getClassLoader());
+
+        this.runtimeClassPathEntries = runtimeClassPathEntries;
+        this.runtimeClassPathClassLoader = new URLClassLoader("Ducker runtime", runtimeClassPathEntries, this.getClass().getClassLoader());
+
     }
 
     @Override
     public URL[] getClassPath()
     {
-        return classpathEntries;
+        return fullClassPathEntries;
     }
 
     @Override
     public Class<?> findClass(final String name) throws ClassNotFoundException
     {
-        return Class.forName(name, false, this.urlClassLoader);
+        return Class.forName(name, false, this.fullClassPathClassLoader);
     }
 
     @Override
     public Class<?> findClass(final String name, final boolean initialize) throws ClassNotFoundException
     {
-        return Class.forName(name, initialize, this.urlClassLoader);
+        return Class.forName(name, initialize, this.fullClassPathClassLoader);
     }
 
     @Override
     public Class<?> findAgentClass(final String name, final boolean initialize) throws ClassNotFoundException
     {
-        return Class.forName(name, initialize, this.urlClassLoader);
+        return Class.forName(name, initialize, this.fullClassPathClassLoader);
     }
 
-    public URLClassLoader getUrlClassLoader() {
-        return urlClassLoader;
+    public URLClassLoader getFullClassLoader() {
+        return fullClassPathClassLoader;
+    }
+
+    public URLClassLoader getRuntimeClassPathClassLoader()
+    {
+        return runtimeClassPathClassLoader;
     }
 
     @Override
     public void close() throws IOException
     {
-        this.urlClassLoader.close();
+        this.fullClassPathClassLoader.close();
     }
 }
