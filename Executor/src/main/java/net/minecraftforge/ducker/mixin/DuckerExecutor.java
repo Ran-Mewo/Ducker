@@ -1,4 +1,4 @@
-package net.minecraftforge.ducker.executor;
+package net.minecraftforge.ducker.mixin;
 
 import com.google.common.io.Resources;
 import net.minecraftforge.ducker.mixin.DuckerClasspathClassProvider;
