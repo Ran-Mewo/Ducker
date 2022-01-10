@@ -14,8 +14,13 @@ import org.jetbrains.java.decompiler.main.extern.IFernflowerPreferences;
 import org.jetbrains.java.decompiler.main.extern.IResultSaver;
 import org.jetbrains.java.decompiler.util.InterpreterUtil;
 import org.junit.jupiter.api.Test;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.commons.ClassRemapper;
+import org.objectweb.asm.commons.MethodRemapper;
+import org.objectweb.asm.commons.SimpleRemapper;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.logging.Level;
 import org.spongepowered.asm.service.MixinService;
@@ -28,8 +33,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 
 class ExecutorServiceTest
 {
@@ -73,8 +80,25 @@ class ExecutorServiceTest
         @Override
         public File writeClass(final ClassNode classNode)
         {
+            final List<MethodNode> mixinMethods = classNode.methods.stream()
+                    .filter(methodNode -> methodNode.getClass().getPackageName().contains("spongepowered")) //We need all those special mixin methods :D
+                    .toList();
+
+            //We need to remove the mixin merged method annotations....
+            mixinMethods.forEach(mixinMethodNode -> mixinMethodNode.visibleAnnotations.removeIf(annotationNode -> annotationNode.desc.contains("MixinMerged")));
+
+            final Map<String, String> methodRemapMap = mixinMethods.stream()
+                    .collect(Collectors.toMap(
+                            methodNode -> classNode.name + "." + methodNode.name + methodNode.desc,
+                            methodNode -> "ducker$$" + methodNode.name
+                    ));
+
+            final SimpleRemapper simpleRemapper = new SimpleRemapper(methodRemapMap);
+
+
             final ClassWriter classWriter = new ClassWriter(ASM.API_VERSION);
-            classNode.accept(classWriter);
+            final ClassRemapper classRemapper = new ClassRemapper(classWriter, simpleRemapper);
+            classNode.accept(classRemapper);
 
             final File output = new File(outputDirectory, classNode.name + ".class");
             if (!output.exists())
