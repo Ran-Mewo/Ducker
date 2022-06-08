@@ -6,6 +6,8 @@ include('SimpleSource')
 include('SimpleSourceMixin')
 include('NewInvokeSpecial')
 include('NewInvokeSpecialMixin')
+include('ModifyVariable')
+include('ModifyVariableMixin')
 project(':SimpleSource').projectDir = new File("Digger/SimpleSource")
 project(':SimpleSource').name = "SimpleSource - Source"
 project(':SimpleSourceMixin').projectDir = new File("Digger/SimpleSourceMixin")
@@ -14,4 +16,8 @@ project(':NewInvokeSpecial').projectDir = new File("Digger/NewInvokeSpecial")
 project(':NewInvokeSpecial').name = "NewInvokeSpecial - Source"
 project(':NewInvokeSpecialMixin').projectDir = new File("Digger/NewInvokeSpecialMixin")
 project(':NewInvokeSpecialMixin').name = "NewInvokeSpecial - Mixin"
+project(':ModifyVariable').projectDir = new File("Digger/ModifyVariable")
+project(':ModifyVariable').name = "ModifyVariable - Source"
+project(':ModifyVariableMixin').projectDir = new File("Digger/ModifyVariableMixin")
+project(':ModifyVariableMixin').name = "ModifyVariable - Mixin"
 

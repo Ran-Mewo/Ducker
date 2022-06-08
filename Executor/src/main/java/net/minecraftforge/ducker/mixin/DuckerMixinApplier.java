@@ -31,8 +31,11 @@ public class DuckerMixinApplier
                 {
                     final ClassNode classNode = duckerExecutorMixinService.getBytecodeProvider().getClassNode(classInfo.getName(), true);
                     processClassNode(duckerExecutorMixinService, classNode);
+
+                    classNode.sourceDebug = null;
+
                     LOGGER.info("Processed {}", classNode.name);
-                    final File file = duckerConfiguration.getClassWriter().writeClass(classNode);
+                    final File file = duckerConfiguration.getClassWriter().writeClass(duckerConfiguration, classNode);
                     LOGGER.info("Written class {}, to {}", classNode.name, file.getAbsolutePath());
                     duckerConfiguration.getDecompiler().decompile(file);
                     LOGGER.info("Decompiled class {}.", classNode.name);

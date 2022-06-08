@@ -1,8 +1,11 @@
 package net.minecraftforge.ducker.configuration;
 
 import net.minecraftforge.ducker.decompile.IDecompiler;
+import net.minecraftforge.ducker.processor.IResultsProcessor;
+import net.minecraftforge.ducker.transformers.IResultsTransformer;
 import net.minecraftforge.ducker.writer.IClassWriter;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class DuckerConfiguration
@@ -13,19 +16,26 @@ public class DuckerConfiguration
     private final String rootNamespace;
     private final IClassWriter classWriter;
     private final IDecompiler decompiler;
+    private final LinkedList<IResultsTransformer> resultsTransformers;
+    private final LinkedList<IResultsProcessor> resultsProcessors;
 
     public DuckerConfiguration(
       final List<String> targetRuntimeClasspath,
       final String targetJar,
       final List<String> mixinSourcesClasspath,
       final String rootNamespace,
-      final IClassWriter classWriter, final IDecompiler decompiler) {
+      final IClassWriter classWriter,
+      final IDecompiler decompiler,
+      final LinkedList<IResultsTransformer> resultsTransformers,
+      final LinkedList<IResultsProcessor> resultsProcessors) {
         this.targetRuntimeClasspath = targetRuntimeClasspath;
         this.targetJar = targetJar;
         this.mixinSourcesClasspath = mixinSourcesClasspath;
         this.rootNamespace = rootNamespace;
         this.classWriter = classWriter;
         this.decompiler = decompiler;
+        this.resultsTransformers = resultsTransformers;
+        this.resultsProcessors = resultsProcessors;
     }
 
     public List<String> getTargetRuntimeClasspath()
@@ -56,5 +66,15 @@ public class DuckerConfiguration
     public IDecompiler getDecompiler()
     {
         return decompiler;
+    }
+
+    public LinkedList<IResultsTransformer> getResultsTransformers()
+    {
+        return resultsTransformers;
+    }
+
+    public LinkedList<IResultsProcessor> getResultsProcessors()
+    {
+        return resultsProcessors;
     }
 }
