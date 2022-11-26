@@ -12,17 +12,18 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Set;
 import java.util.TreeMap;
 
 public class FFBasedLineNumberFixer implements IResultsProcessor
 {
     @Override
-    public byte[] process(final byte[] bytes)
+    public byte[] process(final byte[] bytes, Set<File> additionalFiles)
     {
         final ClassReader classReader = new ClassReader(bytes);
         final ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
 
-        classReader.accept(new LineNumberFixingClassVisitor(bytes, classWriter), 0);
+        classReader.accept(new LineNumberFixingClassVisitor(bytes, additionalFiles, classWriter), 0);
 
         return classWriter.toByteArray();
     }
@@ -31,7 +32,7 @@ public class FFBasedLineNumberFixer implements IResultsProcessor
 
         private final NavigableMap<Integer, Integer> lineNumberMap = new TreeMap<>();
 
-        public LineNumberFixingClassVisitor(final byte[] originalData, final ClassVisitor classVisitor)
+        public LineNumberFixingClassVisitor(final byte[] originalData, Set<File> additionalFiles, final ClassVisitor classVisitor)
         {
             super(ASM.API_VERSION, classVisitor);
 
@@ -42,7 +43,7 @@ public class FFBasedLineNumberFixer implements IResultsProcessor
 
                 final Fernflower fernflower = ForgeFlowerDecompilerBuilder.getInstance().build(
                   "LineNumberFixingClassVisitor",
-                  () -> originalData,
+                  () -> null,
                   new AbstractResultSaver() {
                       @Override
                       public void saveClassFile(final String path, final String qualifiedName, final String entryName, final String content, final int[] mapping)
@@ -55,7 +56,8 @@ public class FFBasedLineNumberFixer implements IResultsProcessor
                           }
                       }
                   },
-                  tempTarget
+                  tempTarget,
+                  additionalFiles
                 );
 
                 fernflower.decompileContext();

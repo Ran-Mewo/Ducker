@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.minecraftforge.ducker.digger.mixins",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "MainMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

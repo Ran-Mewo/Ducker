@@ -12,6 +12,7 @@ import org.jetbrains.java.decompiler.util.InterpreterUtil;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public final class ForgeFlowerDecompilerBuilder
@@ -38,11 +39,11 @@ public final class ForgeFlowerDecompilerBuilder
     {
     }
 
-    public Fernflower build(final String name, final Supplier<byte[]> classByteSupplier, final IResultSaver saver, final File decompileTarget) {
-        return build(name, classByteSupplier, saver, () -> DEFAULT_FORGE_FLOWER_OPTIONS, decompileTarget);
+    public Fernflower build(final String name, final Supplier<byte[]> classByteSupplier, final IResultSaver saver, final File decompileTarget, final Set<File> additionalFiles) {
+        return build(name, classByteSupplier, saver, () -> DEFAULT_FORGE_FLOWER_OPTIONS, decompileTarget, additionalFiles);
     }
 
-    public Fernflower build(final String name, final Supplier<byte[]> classByteSupplier, final IResultSaver saver, final Supplier<Map<String, Object>> optionsBuilder, final File decompileTarget) {
+    public Fernflower build(final String name, final Supplier<byte[]> classByteSupplier, final IResultSaver saver, final Supplier<Map<String, Object>> optionsBuilder, final File decompileTarget, final Set<File> additionalFiles) {
         final Logger logger = LogManager.getLogger("Decompiler: " + name);
 
         final Fernflower fernflower = new Fernflower((externalPath, internalPath) -> {
@@ -81,6 +82,10 @@ public final class ForgeFlowerDecompilerBuilder
             // New fernflower (including forgeflower)
             Method mdAddSource = fernflower.getClass().getDeclaredMethod("addSource", File.class);
             mdAddSource.invoke(fernflower, decompileTarget);
+
+            for (File additionalFile : additionalFiles) {
+                mdAddSource.invoke(fernflower, additionalFile);
+            }
         } catch (ReflectiveOperationException ex) {
             // Old fernflower
             throw new IllegalStateException("Fernflower is too old", ex);

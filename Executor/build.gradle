@@ -23,11 +23,13 @@ dependencies {
     api "net.minecraftforge:forgeflower:${project.forgeflower_version}"
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:${project.junit_version}"
+    testImplementation  "org.junit.jupiter:junit-jupiter-params:${project.junit_version}"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${project.junit_version}"
 }
 
 test {
     useJUnitPlatform()
+    forkEvery(1)
 }
 
 // Setup testing environment
@@ -35,6 +37,12 @@ test {
 def executorProject = project
 def diggerProjects = rootProject.allprojects.findAll{project -> rootProject.projectDir.toPath().relativize(project.projectDir.toPath()).toString().startsWith("Digger")}
 diggerProjects.forEach {diggerProject ->
+
+    diggerProject.getPlugins().apply("java")
+    diggerProject.getPlugins().apply("application")
+
+    diggerProject.version = "1.0"
+
     diggerProject.tasks.create("setupTestEnvironment", Copy) { setupTask ->
         setupTask.from diggerProject.projectDir.toPath().resolve("build/libs").toFile()
         setupTask.into executorProject.projectDir.toPath().resolve("src/test/resources/runtimes/${diggerProject.name}").toFile()
@@ -45,7 +53,25 @@ diggerProjects.forEach {diggerProject ->
 
         setupTask.description = "Copy ${diggerProject.name} jars to executors test resources"
         setupTask.group = "verification"
+    }
 
+    if (diggerProject.name.endsWith("- Mixin")) {
+        var projectId = diggerProject.name.replace(" - Mixin", "").toLowerCase()
+
+        //Mixin project
+        diggerProject.dependencies {
+            implementation project(":${diggerProject.name.replace("Mixin", "Source")}")
+            implementation "org.spongepowered:mixin:${project.mixin_version}"
+        }
+
+        diggerProject.jar {it ->
+            it.manifest { manifest ->
+                manifest.attributes([
+                        "Automatic-Module-Name"   : "${projectId}",
+                        "MixinConfigs": "test.mixins.json"
+                ])
+            }
+        }
     }
 }
 

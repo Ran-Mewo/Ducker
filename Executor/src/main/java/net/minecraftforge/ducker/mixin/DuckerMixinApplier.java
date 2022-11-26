@@ -3,6 +3,7 @@ package net.minecraftforge.ducker.mixin;
 import com.google.common.reflect.ClassPath;
 import net.minecraftforge.ducker.configuration.DuckerConfiguration;
 import net.minecraftforge.ducker.mixin.classes.IClassProcessor;
+import net.minecraftforge.ducker.writer.IClassWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Type;
@@ -35,9 +36,9 @@ public class DuckerMixinApplier
                     classNode.sourceDebug = null;
 
                     LOGGER.info("Processed {}", classNode.name);
-                    final File file = duckerConfiguration.getClassWriter().writeClass(duckerConfiguration, classNode);
-                    LOGGER.info("Written class {}, to {}", classNode.name, file.getAbsolutePath());
-                    duckerConfiguration.getDecompiler().decompile(file);
+                    final IClassWriter.ClassWriterResult writerResult = duckerConfiguration.getClassWriter().writeClass(duckerConfiguration, classNode);
+                    LOGGER.info("Written class {}, to {}, with {} additional files", classNode.name, writerResult.file().getAbsolutePath(), writerResult.additionalFiles().size());
+                    duckerConfiguration.getDecompiler().decompile(writerResult.file(), writerResult.additionalFiles());
                     LOGGER.info("Decompiled class {}.", classNode.name);
                 }
                 catch (ClassNotFoundException | IOException e)

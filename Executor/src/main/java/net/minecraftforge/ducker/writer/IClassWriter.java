@@ -4,9 +4,11 @@ import net.minecraftforge.ducker.configuration.DuckerConfiguration;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.io.File;
+import java.util.Set;
 
 public interface IClassWriter
 {
+    record ClassWriterResult(File file, Set<File> additionalFiles) {}
 
-    File writeClass(final DuckerConfiguration configuration, final ClassNode classNode);
+    ClassWriterResult writeClass(final DuckerConfiguration configuration, final ClassNode classNode);
 }

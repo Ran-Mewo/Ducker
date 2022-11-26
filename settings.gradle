@@ -1,23 +1,30 @@
+import java.nio.file.Files
+
 rootProject.name = 'Ducker'
+
+var projectDir = rootProject.buildFile.parentFile;
+var diggerDir = new File(projectDir, 'Digger');
+
+Files.walk(diggerDir.toPath(), 1)
+    .filter { it.toFile().isDirectory() }
+    .forEach { it -> {
+
+        if (it.toFile().name == 'Digger') {
+            return;
+        }
+
+        include it.toFile().name
+
+        project(":${it.toFile().name}").projectDir = it.toFile()
+        if (it.toFile().name.endsWith("Mixin")) {
+            project(":${it.toFile().name}").name = "${it.toFile().name.replace("Mixin", "")} - Mixin"
+        } else {
+            project(":${it.toFile().name}").name = "${it.toFile().name} - Source"
+        }
+    } }
 
 include('Executor')
 include('Arbiter')
-include('SimpleSource')
-include('SimpleSourceMixin')
-include('NewInvokeSpecial')
-include('NewInvokeSpecialMixin')
-include('ModifyVariable')
-include('ModifyVariableMixin')
-project(':SimpleSource').projectDir = new File("Digger/SimpleSource")
-project(':SimpleSource').name = "SimpleSource - Source"
-project(':SimpleSourceMixin').projectDir = new File("Digger/SimpleSourceMixin")
-project(':SimpleSourceMixin').name = "SimpleSource - Mixin"
-project(':NewInvokeSpecial').projectDir = new File("Digger/NewInvokeSpecial")
-project(':NewInvokeSpecial').name = "NewInvokeSpecial - Source"
-project(':NewInvokeSpecialMixin').projectDir = new File("Digger/NewInvokeSpecialMixin")
-project(':NewInvokeSpecialMixin').name = "NewInvokeSpecial - Mixin"
-project(':ModifyVariable').projectDir = new File("Digger/ModifyVariable")
-project(':ModifyVariable').name = "ModifyVariable - Source"
-project(':ModifyVariableMixin').projectDir = new File("Digger/ModifyVariableMixin")
-project(':ModifyVariableMixin').name = "ModifyVariable - Mixin"
+
+
 

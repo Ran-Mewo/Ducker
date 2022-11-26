@@ -5,15 +5,17 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.util.asm.ASM;
 
+import javax.naming.PartialResultException;
+
 public class SourceMapStrippingTransformer implements IResultsTransformer
 {
     @Override
-    public ClassVisitor transform(final ClassNode node, final ClassVisitor previous)
+    public ClassVisitor transform(ClassNode node, ClassVisitor previous)
     {
         return new SourceMapStrippingVisitor(previous);
     }
 
-    private final class SourceMapStrippingVisitor extends ClassVisitor
+    private static final class SourceMapStrippingVisitor extends ClassVisitor
     {
         public SourceMapStrippingVisitor(final ClassVisitor cv)
         {

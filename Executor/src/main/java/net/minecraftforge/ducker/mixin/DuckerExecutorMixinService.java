@@ -11,6 +11,7 @@ import org.spongepowered.asm.util.IConsumer;
 
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.util.Collection;
 
 public final class DuckerExecutorMixinService extends MixinServiceAbstract

@@ -12,6 +12,7 @@ import org.jetbrains.java.decompiler.util.InterpreterUtil;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Set;
 
 @SuppressWarnings({"UnstableApiUsage", "ResultOfMethodCallIgnored", "deprecation"})
 public class ForgeFlowerBasedDecompiler implements IDecompiler
@@ -36,22 +37,13 @@ public class ForgeFlowerBasedDecompiler implements IDecompiler
     }
 
     @Override
-    public void decompile(final File file)
+    public void decompile(final File file, final Set<File> additionalFiles)
     {
         try
         {
             final Fernflower fernflower = ForgeFlowerDecompilerBuilder.getInstance().build(
               "FileCompiler",
-              () -> {
-                  try
-                  {
-                      return InterpreterUtil.getBytes(file);
-                  }
-                  catch (IOException e)
-                  {
-                      throw new IllegalStateException("Could not read bytes from input file: " + file.getAbsolutePath(), e);
-                  }
-              },
+              () -> null,
               new AbstractResultSaver()
               {
                   @Override
@@ -70,7 +62,8 @@ public class ForgeFlowerBasedDecompiler implements IDecompiler
                       }
                   }
               },
-              file
+              file,
+              additionalFiles
             );
 
             try

@@ -12,16 +12,10 @@ import java.util.function.Supplier;
  */
 public final class TypesafeMap
 {
-    private static final ConcurrentHashMap<Class<?>, TypesafeMap> maps = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Key<Object>, Object> map = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Key<Object>> keys = new ConcurrentHashMap<>();
 
     public TypesafeMap() {
-    }
-
-    public TypesafeMap(Class<?> owner) {
-        KeyBuilder.keyBuilders.getOrDefault(owner, Collections.emptyList()).forEach(kb -> kb.buildKey(this));
-        maps.put(owner, this);
     }
 
     public <V> Optional<V> get(Key<V> key) {
@@ -102,36 +96,6 @@ public final class TypesafeMap
             }
 
             throw new RuntimeException("Huh?");
-        }
-    }
-
-    public static final class KeyBuilder<T> implements Supplier<Key<T>> {
-        private static final Map<Class<?>, List<KeyBuilder<?>>> keyBuilders = new HashMap<>();
-        private final Class<?> owner;
-        private final String name;
-        private final Class<? super T> clazz;
-        private Key<T> key;
-
-        public KeyBuilder(String name, Class<? super T> clazz, Class<?> owner) {
-            this.name = name;
-            this.clazz = clazz;
-            this.owner = owner;
-            keyBuilders.computeIfAbsent(owner, k -> new ArrayList<>()).add(this);
-        }
-
-        final void buildKey(TypesafeMap map) {
-            key = Key.getOrCreate(map, name, clazz);
-        }
-
-        @Override
-        public Key<T> get() {
-            if (key == null && maps.containsKey(owner)) {
-                buildKey(maps.get(owner));
-            }
-            if (key == null) {
-                throw new NullPointerException("Missing map");
-            }
-            return key;
         }
     }
 }

@@ -25,6 +25,7 @@
 package net.minecraftforge.ducker.decompile;
 
 import java.io.File;
+import java.util.Set;
 
 /**
  * Interface to allow the actual decompiler to be loaded on-demand
@@ -37,5 +38,9 @@ public interface IDecompiler
      * 
      * @param file .class file to decompile
      */
-    void decompile(File file);
+    default void decompile(File file) {
+        decompile(file, Set.of());
+    }
+
+    void decompile(File file, Set<File> additionalFiles);
 }
