@@ -5,8 +5,10 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.commons.ClassRemapper;
 import org.objectweb.asm.commons.SimpleRemapper;
 import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.asm.util.asm.MethodNodeEx;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -25,16 +27,31 @@ public class MixinMethodRemapper implements IMixinMethodAwareTransformer
           .collect(Collectors.toMap(
             methodNode -> node.name + "." + methodNode.name + methodNode.desc,
             methodNode -> {
-                final String mixinName = methodNode.name.substring(methodNode.name.lastIndexOf("$") + 1);
-                final MethodIdentification methodIdentification = new MethodIdentification(mixinName, methodNode.desc);
-                if (!nameByIdentification.containsKey(methodIdentification))
-                    return mixinName;
+                if (methodNode instanceof MethodNodeEx methodNodeEx) {
+                    final String mixinName = methodNodeEx.getOriginalName();
+                    if (Objects.equals(mixinName, methodNode.name)) {
+                        return methodNode.name;
+                    }
 
-                if (!offsetByMethodName.containsKey(mixinName))
-                    offsetByMethodName.put(mixinName, new AtomicInteger(0));
+                    final MethodIdentification methodIdentification = new MethodIdentification(mixinName, methodNode.desc);
+                    if (!nameByIdentification.containsKey(methodIdentification))
+                        return mixinName;
 
-                final int offset = offsetByMethodName.get(mixinName).getAndIncrement();
-                return mixinName + "$" + offset;
+                    final String prefixedMixinName = mixinName + "For" + methodNodeEx.getOwner().getName();
+
+                    if (!offsetByMethodName.containsKey(prefixedMixinName))
+                        offsetByMethodName.put(prefixedMixinName, new AtomicInteger(0));
+
+                    final int offset = offsetByMethodName.get(prefixedMixinName).getAndIncrement();
+                    if (offset == 0) {
+                        return prefixedMixinName;
+                    } else {
+                        return prefixedMixinName + (offset - 1);
+                    }
+                }
+
+                //Path will likely be never taken!
+                return methodNode.name;
             }
           ));
 
