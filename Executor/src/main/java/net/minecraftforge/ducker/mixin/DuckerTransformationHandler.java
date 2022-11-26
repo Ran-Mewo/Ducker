@@ -1,6 +1,7 @@
 package net.minecraftforge.ducker.mixin;
 
 import com.google.common.base.Preconditions;
+import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import net.minecraftforge.ducker.mixin.classes.IClassProcessor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
@@ -37,6 +38,9 @@ public class DuckerTransformationHandler implements IClassProcessor
                 throw new IllegalStateException("processClass called before transformer factory offered to transformation handler");
             }
             this.transformer = this.transformerFactory.createTransformer();
+
+            //We can only initialize mixin extras here.
+            MixinExtrasBootstrap.init();
 
             //We set the session ID to a static value.
             //Improves detection at runtime, and produces a guaranteed value during testing.

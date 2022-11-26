@@ -1,6 +1,7 @@
 package net.minecraftforge.ducker.mixin;
 
 import com.google.common.collect.Lists;
+import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import net.minecraftforge.ducker.configuration.DuckerConfiguration;
 import net.minecraftforge.ducker.mixin.classes.IClassProcessor;
 import org.objectweb.asm.Type;
