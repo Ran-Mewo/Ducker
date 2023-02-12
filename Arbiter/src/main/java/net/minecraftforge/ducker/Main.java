@@ -83,14 +83,16 @@ public class Main {
                 throw new IllegalArgumentException("Missing required arguments");
             }
         } catch (Exception ex) {
-            LOGGER.error("Failed to parse arguments", ex);
+            LOGGER.error("Failed to parse arguments");
             LOGGER.error("");
             LOGGER.error("Usage:");
             try {
                 parser.printHelpOn(new Writer() {
                     @Override
                     public void write(char[] cbuf, int off, int len) {
-                        LOGGER.error(new String(cbuf, off, len));
+                        final String content = new String(cbuf, off, len);
+                        final List<String> lines = Lists.newArrayList(content.split("\n"));
+                        lines.forEach(LOGGER::error);
                     }
 
                     @Override
