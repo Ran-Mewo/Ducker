@@ -1,8 +1,15 @@
 plugins {
     id 'java'
     id 'application'
+
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 dependencies {
     implementation project(':Executor')
+    implementation group: 'net.sf.jopt-simple', name: 'jopt-simple', version: '6.0-alpha-3'
+}
+
+application {
+    mainClassName = 'net.minecraft.ducker.Main'
 }
