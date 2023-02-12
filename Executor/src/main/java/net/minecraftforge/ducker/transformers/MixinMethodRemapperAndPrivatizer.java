@@ -2,6 +2,7 @@ package net.minecraftforge.ducker.transformers;
 
 import com.google.common.collect.Maps;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.ClassRemapper;
 import org.objectweb.asm.commons.SimpleRemapper;
 import org.objectweb.asm.tree.ClassNode;
@@ -12,7 +13,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public class MixinMethodRemapper implements IMixinMethodAwareTransformer
+public class MixinMethodRemapperAndPrivatizer implements IMixinMethodAwareTransformer
 {
     @Override
     public ClassVisitor transform(ClassNode node, ClassVisitor previous)
@@ -54,6 +55,12 @@ public class MixinMethodRemapper implements IMixinMethodAwareTransformer
                 return methodNode.name;
             }
           ));
+
+        for (final var methodNode : getMixinMethods(node)) {
+            if (methodNode instanceof MethodNodeEx methodNodeEx && !methodNode.name.equals(methodNodeEx.getOriginalName())) {
+                methodNode.access &= ~Opcodes.ACC_PUBLIC; //Remove public access
+            }
+        }
 
         final SimpleRemapper simpleRemapper = new SimpleRemapper(methodRemapMap);
         return new ClassRemapper(previous, simpleRemapper);

@@ -6,10 +6,9 @@ import net.minecraftforge.ducker.decompile.forgeflower.ForgeFlowerBasedDecompile
 import net.minecraftforge.ducker.processor.FFBasedLineNumberFixer;
 import net.minecraftforge.ducker.transformers.ArgsClassStripper;
 import net.minecraftforge.ducker.transformers.MixinAnnotationStripper;
-import net.minecraftforge.ducker.transformers.MixinMethodRemapper;
+import net.minecraftforge.ducker.transformers.MixinMethodRemapperAndPrivatizer;
 import net.minecraftforge.ducker.transformers.SourceMapStrippingTransformer;
 import net.minecraftforge.ducker.writer.SimpleClassWriter;
-import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.Collections;
@@ -32,7 +31,7 @@ class ExecutorServiceTest
                         Lists.newArrayList(
                                 new ArgsClassStripper(),
                                 new MixinAnnotationStripper(),
-                                new MixinMethodRemapper(),
+                                new MixinMethodRemapperAndPrivatizer(),
                                 new SourceMapStrippingTransformer()
                         )
                 ),
