@@ -1,6 +1,11 @@
 plugins {
     id 'java'
     id 'java-library'
+    id 'maven-publish'
+}
+
+configurations {
+    implementation.extendsFrom(api)
 }
 
 dependencies {
@@ -116,4 +121,18 @@ static void deleteFolder(File folder) {
         }
     }
     folder.delete();
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId = 'net.minecraftforge'
+            artifactId = 'ducker'
+            version = project.version
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
 }

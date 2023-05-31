@@ -4,10 +4,9 @@ import com.google.common.base.Charsets;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import net.minecraftforge.ducker.decompile.IDecompiler;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.java.decompiler.main.Fernflower;
-import org.jetbrains.java.decompiler.util.InterpreterUtil;
+import org.spongepowered.asm.logging.ILogger;
+import org.spongepowered.asm.service.MixinService;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +16,7 @@ import java.util.Set;
 @SuppressWarnings({"UnstableApiUsage", "ResultOfMethodCallIgnored", "deprecation"})
 public class ForgeFlowerBasedDecompiler implements IDecompiler
 {
-    private final Logger logger = LogManager.getLogger();
+    private final ILogger logger = MixinService.getService().getLogger("decompiler");
     private final File   outputPath;
 
     public ForgeFlowerBasedDecompiler(File outputPath)
@@ -39,6 +38,7 @@ public class ForgeFlowerBasedDecompiler implements IDecompiler
     @Override
     public void decompile(final File file, final Set<File> additionalFiles)
     {
+        if (file.getAbsolutePath().contains("server")) return;
         try
         {
             final Fernflower fernflower = ForgeFlowerDecompilerBuilder.getInstance().build(

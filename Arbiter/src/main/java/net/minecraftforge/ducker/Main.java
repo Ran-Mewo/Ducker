@@ -10,27 +10,35 @@ import net.minecraftforge.ducker.decompile.NoopDecompiler;
 import net.minecraftforge.ducker.decompile.forgeflower.ForgeFlowerBasedDecompiler;
 import net.minecraftforge.ducker.executor.ExecutorService;
 import net.minecraftforge.ducker.processor.FFBasedLineNumberFixer;
+import net.minecraftforge.ducker.transformers.AccessorDesynthesizerTransformer;
 import net.minecraftforge.ducker.transformers.ArgsClassStripper;
+import net.minecraftforge.ducker.transformers.IResultsTransformer;
 import net.minecraftforge.ducker.transformers.MixinAnnotationStripper;
 import net.minecraftforge.ducker.transformers.MixinMethodRemapperAndPrivatizer;
+import net.minecraftforge.ducker.transformers.OverwriteFixerTransformer;
 import net.minecraftforge.ducker.transformers.SourceMapStrippingTransformer;
 import net.minecraftforge.ducker.writer.SimpleClassWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spongepowered.asm.util.asm.ASM;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collections;
+import java.lang.reflect.Field;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Main {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
+        System.out.println("Property is now: " + System.getProperty("mixin.env.refMapRemappingFile"));
+        LOGGER.warn("Property: {}", System.getProperty("mixin.env.refMapRemappingFile"));
         LOGGER.warn("Starting Ducker with args: {}", (Object)args);
 
         final OptionParser parser = new OptionParser();
@@ -61,25 +69,32 @@ public class Main {
 
         final AbstractOptionSpec<String> targetPackageOption = parser.acceptsAll(
                         Lists.newArrayList("package", "p"),
-                        "The root package of the classes to process.")
+                        "The root packages of the classes to process.")
                 .withRequiredArg();
+
+        final AbstractOptionSpec<Transformer> transformersOption = parser.acceptsAll(
+                List.of("transformer"),
+                "Post-mixin transformers to run"
+        ).withOptionalArg().ofType(Transformer.class);
+
+        final AbstractOptionSpec<String> classpath = parser.acceptsAll(List.of("classpath")).withRequiredArg();
 
         final OptionSet parsed = parser.parse(args);
 
         final File target;
-        final String rootPackage;
+        final List<String> rootPackages;
         final List<File> mixin;
         final File output;
         final Optional<File> sources;
         try {
             target = targetJarOption.value(parsed);
-            rootPackage = targetPackageOption.value(parsed);
+            rootPackages = targetPackageOption.values(parsed);
             mixin = parsed.valuesOf(mixinJarOption);
 
             output = outputDirectoryOption.value(parsed);
             sources = parsed.has(sourcesDirectoryOption) ? Optional.of(sourcesDirectoryOption.value(parsed)) : Optional.empty();
 
-            if (target == null || rootPackage == null || mixin.isEmpty() || output == null) {
+            if (target == null || rootPackages.isEmpty() || mixin.isEmpty() || output == null) {
                 throw new IllegalArgumentException("Missing required arguments");
             }
         } catch (Exception ex) {
@@ -112,26 +127,21 @@ public class Main {
             throw new IllegalStateException("Failed to parse arguments", ex);
         }
 
+        ASM.getApiVersionMajor();
+        setValue(ASM.class, "majorVersion", 9);
+        setValue(ASM.class, "minorVersion", 2);
+        setValue(ASM.class, "implMinorVersion", 2);
+        setValue(ASM.class, "patchVersion", 0);
 
         final DuckerConfiguration configuration = new DuckerConfiguration(
-                Collections.emptyList(),
+                classpath.values(parsed),
                 target.getAbsolutePath(),
                 mixin.stream().map(File::getAbsolutePath).toList(),
-                rootPackage,
+                rootPackages,
                 new SimpleClassWriter(output),
                 sources.map((Function<File, IDecompiler>) ForgeFlowerBasedDecompiler::new).orElse(NoopDecompiler.INSTANCE),
-                Lists.newLinkedList(
-                        Lists.newArrayList(
-                                new ArgsClassStripper(),
-                                new MixinAnnotationStripper(),
-                                new MixinMethodRemapperAndPrivatizer(),
-                                new SourceMapStrippingTransformer()
-                        )
-                ),
-                Lists.newLinkedList(
-                        Lists.newArrayList(
-                                new FFBasedLineNumberFixer()
-                        )));
+                parsed.valuesOf(transformersOption).stream().map(Transformer::newTransformer).collect(Collectors.toCollection(LinkedList::new)),
+                Lists.newLinkedList());
 
         try {
             ExecutorService.getInstance().execute(configuration);
@@ -140,5 +150,56 @@ public class Main {
             System.exit(1);
             throw new IllegalStateException("Failed to execute", ex);
         }
+    }
+
+    private static void setValue(Class<?> clazz, String field, int value) {
+        try {
+            final Field fl = clazz.getDeclaredField(field);
+            fl.setAccessible(true);
+            fl.setInt(null, value);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public enum Transformer {
+        ARGS_CLASS_STRIPPER {
+            @Override
+            public IResultsTransformer newTransformer() {
+                return new ArgsClassStripper();
+            }
+        },
+        MIXIN_ANNOTATION_STRIPPER {
+            @Override
+            public IResultsTransformer newTransformer() {
+                return new MixinAnnotationStripper();
+            }
+        },
+        MIXIN_METHOD_REMAPPER_PRIVATIZER {
+            @Override
+            public IResultsTransformer newTransformer() {
+                return new MixinMethodRemapperAndPrivatizer();
+            }
+        },
+        SOURCE_MAP_STRIPPER {
+            @Override
+            public IResultsTransformer newTransformer() {
+                return new SourceMapStrippingTransformer();
+            }
+        },
+        ACCESSOR_DESYNTHESIZER {
+            @Override
+            public IResultsTransformer newTransformer() {
+                return new AccessorDesynthesizerTransformer();
+            }
+        },
+        OVERWRITE_FIXER {
+            @Override
+            public IResultsTransformer newTransformer() {
+                return new OverwriteFixerTransformer();
+            }
+        };
+
+        public abstract IResultsTransformer newTransformer();
     }
 }

@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 public final class ExecutorService
 {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(ExecutorService.class);
     private static final ExecutorService INSTANCE = new ExecutorService();
 
     public static ExecutorService getInstance()

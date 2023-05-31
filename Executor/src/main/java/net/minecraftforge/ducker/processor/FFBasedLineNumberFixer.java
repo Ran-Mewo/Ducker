@@ -2,6 +2,8 @@ package net.minecraftforge.ducker.processor;
 
 import net.minecraftforge.ducker.decompile.forgeflower.AbstractResultSaver;
 import net.minecraftforge.ducker.decompile.forgeflower.ForgeFlowerDecompilerBuilder;
+import net.minecraftforge.ducker.mixin.DuckerExecutorMixinService;
+import net.minecraftforge.ducker.util.DuckerClassWriter;
 import org.jetbrains.java.decompiler.main.Fernflower;
 import org.objectweb.asm.*;
 import org.spongepowered.asm.util.asm.ASM;
@@ -18,10 +20,10 @@ import java.util.TreeMap;
 public class FFBasedLineNumberFixer implements IResultsProcessor
 {
     @Override
-    public byte[] process(final byte[] bytes, Set<File> additionalFiles)
+    public byte[] process(final byte[] bytes, Set<File> additionalFiles, final DuckerExecutorMixinService service)
     {
         final ClassReader classReader = new ClassReader(bytes);
-        final ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+        final ClassWriter classWriter = new DuckerClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES, service);
 
         classReader.accept(new LineNumberFixingClassVisitor(bytes, additionalFiles, classWriter), 0);
 
@@ -83,6 +85,11 @@ public class FFBasedLineNumberFixer implements IResultsProcessor
                     } else {
                         super.visitLineNumber(line, start);
                     }
+                }
+
+                @Override
+                public void visitFrame(int type, int numLocal, Object[] local, int numStack, Object[] stack) {
+                    super.visitFrame(type, numLocal, local, numStack, stack);
                 }
             };
         }

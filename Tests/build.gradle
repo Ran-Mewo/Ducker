@@ -1,0 +1,61 @@
+import java.nio.file.Files
+//buildscript {
+//    repositories {
+//        maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
+//    }
+//    dependencies {
+//        classpath 'org.spongepowered:vanillagradle:0.2.1-SNAPSHOT'
+//    }
+//}
+plugins {
+    id 'java'
+}
+
+evaluationDependsOn(':Arbiter')
+
+dependencies {
+    compileOnly "org.spongepowered:mixin:${project.mixin_version}"
+}
+
+tasks.register('mixinJar', Jar) {
+    it.dependsOn('inputJar')
+    it.from(sourceSets.main.output) {
+        include 'net/minecraftforge/ducker/tests/mixin/**'
+        include 'test.mixins.json'
+    }
+    it.manifest.attributes([
+            'MixinConfigs': 'test.mixins.json'
+    ])
+    archivesBaseName = 'mixins'
+}
+
+tasks.register('inputJar', Jar) {
+    it.from(sourceSets.main.output) {
+        exclude 'net/minecraftforge/ducker/tests/mixin/**'
+        exclude 'test.mixins.json'
+    }
+    it.from(sourceSets.main.output) {
+        include 'net/minecraftforge/ducker/tests/mixin/accessor/**'
+    }
+    archivesBaseName = 'input'
+}
+
+tasks.register('run', JavaExec) {
+    it.dependsOn('mixinJar')
+    it.classpath(project(':Arbiter').tasks.shadowJar)
+    it.mainClass.set('net.minecraftforge.ducker.Main')
+    doFirst {
+        delete('run')
+        Files.createDirectories(file('run').toPath())
+    }
+    println(file('run/out'))
+    it.args(
+            '-t', tasks.inputJar.archiveFile.get().asFile,
+            '-m', tasks.mixinJar.archiveFile.get().asFile,
+            '-o', file('run/out'),
+            '-s', file('run/sources'),
+            '-p', 'net',
+            '--transformer', 'MIXIN_METHOD_REMAPPER_PRIVATIZER',
+            '--transformer', 'ACCESSOR_DESYNTHESIZER'
+    )
+}

@@ -1,5 +1,4 @@
 group 'net.minecraftforge'
-version '1.0-SNAPSHOT'
 
 subprojects { subproject ->
     subproject.group = rootProject.group

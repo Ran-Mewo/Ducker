@@ -25,6 +25,7 @@ Files.walk(diggerDir.toPath(), 1)
 
 include('Executor')
 include('Arbiter')
+include('Tests')
 
 
 

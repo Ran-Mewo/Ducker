@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'maven-publish'
 
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
@@ -11,5 +12,36 @@ dependencies {
 }
 
 application {
-    mainClassName = 'net.minecraft.ducker.Main'
+    mainClassName = 'net.minecraftforge.ducker.Main'
+}
+
+jar {
+    archiveClassifier.set('slim')
+}
+shadowJar {
+    archiveClassifier.set('')
+    manifest.attributes([
+            'Implementation-Version': '9.2'
+    ], 'org/objectweb/asm/**')
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'net.minecraftforge'
+            artifactId = 'ducker-arbiter'
+            version = project.version
+            artifacts = [tasks.shadowJar]
+        }
+    }
+    repositories {
+        mavenLocal()
+        maven {
+            url = 'https://maven.moddinginquisition.org/mcforge'
+            credentials {
+                username = findProperty('inquisitionMavenUser')
+                password = findProperty('inquisitionMavenPassword')
+            }
+        }
+    }
 }

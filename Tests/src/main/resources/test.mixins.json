@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.minecraftforge.ducker.tests.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "MainMixin",
+    "SomeClassMixin",
+    "accessor.SomeClassAccessor"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -9,13 +9,12 @@ import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 
-import java.io.File;
 import java.io.IOException;
 
 public class DuckerMixinApplier
 {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(DuckerMixinApplier.class);
     private DuckerMixinApplier()
     {
         throw new IllegalStateException("Can not instantiate an instance of: DuckerMixinApplier. This is a utility class");
@@ -27,25 +26,31 @@ public class DuckerMixinApplier
         try
         {
             ClassPath classPath = ClassPath.from(duckerExecutorMixinService.getClassPathProvider().getRuntimeClassPathClassLoader());
-            classPath.getTopLevelClassesRecursive(duckerConfiguration.getRootNamespace()).forEach(classInfo -> {
-                try
-                {
-                    final ClassNode classNode = duckerExecutorMixinService.getBytecodeProvider().getClassNode(classInfo.getName(), true);
-                    processClassNode(duckerExecutorMixinService, classNode);
+            for (final String pkg : duckerConfiguration.getExtractionPackages()) {
+                classPath.getTopLevelClassesRecursive(pkg).forEach(classInfo -> {
+                    try
+                    {
+                        final ClassNode classNode = duckerExecutorMixinService.getBytecodeProvider().getClassNode(classInfo.getName(), true);
+                        System.out.println("We're now at " + classNode.name);
+                        if (processClassNode(duckerExecutorMixinService, classNode)) {
+                            classNode.sourceDebug = null;
 
-                    classNode.sourceDebug = null;
-
-                    LOGGER.info("Processed {}", classNode.name);
-                    final IClassWriter.ClassWriterResult writerResult = duckerConfiguration.getClassWriter().writeClass(duckerConfiguration, classNode);
-                    LOGGER.info("Written class {}, to {}, with {} additional files", classNode.name, writerResult.file().getAbsolutePath(), writerResult.additionalFiles().size());
-                    duckerConfiguration.getDecompiler().decompile(writerResult.file(), writerResult.additionalFiles());
-                    LOGGER.info("Decompiled class {}.", classNode.name);
-                }
-                catch (ClassNotFoundException | IOException e)
-                {
-                    e.printStackTrace();
-                }
-            });
+                            System.out.println("Processed " + classNode.name);
+                            LOGGER.info("Processed {}", classNode.name);
+                            final IClassWriter.ClassWriterResult writerResult = duckerConfiguration.getClassWriter().writeClass(duckerConfiguration, classNode, duckerExecutorMixinService);
+                            System.out.println("Written class " + classInfo.getName());
+                            LOGGER.info("Written class {}, to {}, with {} additional files", classNode.name, writerResult.file().getAbsolutePath(), writerResult.additionalFiles().size());
+                            duckerConfiguration.getDecompiler().decompile(writerResult.file(), writerResult.additionalFiles());
+                            System.out.println("Decompiled " + classNode.name);
+                            LOGGER.info("Decompiled class {}.", classNode.name);
+                        }
+                    }
+                    catch (ClassNotFoundException | IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                });
+            }
         }
         catch (IOException e)
         {

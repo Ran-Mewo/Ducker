@@ -13,7 +13,7 @@ public class DuckerConfiguration
     private final List<String> targetRuntimeClasspath;
     private final String targetJar;
     private final List<String> mixinSourcesClasspath;
-    private final String rootNamespace;
+    private final List<String> extractionPackages;
     private final IClassWriter classWriter;
     private final IDecompiler decompiler;
     private final LinkedList<IResultsTransformer> resultsTransformers;
@@ -23,7 +23,7 @@ public class DuckerConfiguration
       final List<String> targetRuntimeClasspath,
       final String targetJar,
       final List<String> mixinSourcesClasspath,
-      final String rootNamespace,
+      final List<String> extractionPackages,
       final IClassWriter classWriter,
       final IDecompiler decompiler,
       final LinkedList<IResultsTransformer> resultsTransformers,
@@ -31,7 +31,7 @@ public class DuckerConfiguration
         this.targetRuntimeClasspath = targetRuntimeClasspath;
         this.targetJar = targetJar;
         this.mixinSourcesClasspath = mixinSourcesClasspath;
-        this.rootNamespace = rootNamespace;
+        this.extractionPackages = extractionPackages;
         this.classWriter = classWriter;
         this.decompiler = decompiler;
         this.resultsTransformers = resultsTransformers;
@@ -53,9 +53,9 @@ public class DuckerConfiguration
         return mixinSourcesClasspath;
     }
 
-    public String getRootNamespace()
+    public List<String> getExtractionPackages()
     {
-        return rootNamespace;
+        return extractionPackages;
     }
 
     public IClassWriter getClassWriter()

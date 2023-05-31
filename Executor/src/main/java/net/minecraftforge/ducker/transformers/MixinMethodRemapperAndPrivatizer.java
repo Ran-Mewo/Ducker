@@ -3,6 +3,7 @@ package net.minecraftforge.ducker.transformers;
 import com.google.common.collect.Maps;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.ClassRemapper;
 import org.objectweb.asm.commons.SimpleRemapper;
 import org.objectweb.asm.tree.ClassNode;
@@ -11,6 +12,7 @@ import org.spongepowered.asm.util.asm.MethodNodeEx;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class MixinMethodRemapperAndPrivatizer implements IMixinMethodAwareTransformer
