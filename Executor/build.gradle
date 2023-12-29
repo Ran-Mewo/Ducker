@@ -9,8 +9,8 @@ configurations {
 }
 
 dependencies {
-    api "org.spongepowered:mixin:${project.mixin_version}"
-    api "com.github.LlamaLad7:MixinExtras:${project.mixin_extras_version}"
+    api "net.fabricmc:sponge-mixin:${project.mixin_version}"
+    api "io.github.llamalad7:mixinextras-common:${project.mixin_extras_version}"
 
     api "org.apache.logging.log4j:log4j-api:${project.log4j_version}"
     api "org.apache.logging.log4j:log4j-core:${project.log4j_version}"
@@ -69,8 +69,8 @@ diggerProjects.forEach {diggerProject ->
         //Mixin project
         diggerProject.dependencies {
             implementation project(":${diggerProject.name.replace("Mixin", "Source")}")
-            implementation "org.spongepowered:mixin:${project.mixin_version}"
-            implementation "com.github.LlamaLad7:MixinExtras:${project.mixin_extras_version}"
+            implementation "net.fabricmc:sponge-mixin:${project.mixin_version}"
+            implementation "io.github.llamalad7:mixinextras-common:${project.mixin_extras_version}"
         }
 
         diggerProject.jar {it ->

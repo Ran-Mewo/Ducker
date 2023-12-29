@@ -12,6 +12,9 @@ subprojects { subproject ->
             name = 'forge'
             url = 'https://maven.minecraftforge.net/'
         }
-        maven { url = 'https://jitpack.io' }
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
     }
 }
