@@ -42,6 +42,7 @@ tasks.register('inputJar', Jar) {
 
 tasks.register('run', JavaExec) {
     it.dependsOn('mixinJar')
+    it.dependsOn('inputJar')
     it.classpath(project(':Arbiter').tasks.shadowJar)
     it.mainClass.set('net.minecraftforge.ducker.Main')
     doFirst {

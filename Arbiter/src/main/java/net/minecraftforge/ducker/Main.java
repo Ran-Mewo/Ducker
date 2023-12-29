@@ -81,13 +81,13 @@ public class Main {
 
         final OptionSet parsed = parser.parse(args);
 
-        final File target;
+        final List<File> target;
         final List<String> rootPackages;
         final List<File> mixin;
         final File output;
         final Optional<File> sources;
         try {
-            target = targetJarOption.value(parsed);
+            target = targetJarOption.values(parsed);
             rootPackages = targetPackageOption.values(parsed);
             mixin = parsed.valuesOf(mixinJarOption);
 
@@ -135,7 +135,7 @@ public class Main {
 
         final DuckerConfiguration configuration = new DuckerConfiguration(
                 classpath.values(parsed),
-                target.getAbsolutePath(),
+                target.stream().map(File::getAbsolutePath).toList(),
                 mixin.stream().map(File::getAbsolutePath).toList(),
                 rootPackages,
                 new SimpleClassWriter(output),

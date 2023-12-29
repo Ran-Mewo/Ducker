@@ -11,7 +11,7 @@ import java.util.List;
 public class DuckerConfiguration
 {
     private final List<String> targetRuntimeClasspath;
-    private final String targetJar;
+    private final List<String> targetJar;
     private final List<String> mixinSourcesClasspath;
     private final List<String> extractionPackages;
     private final IClassWriter classWriter;
@@ -21,7 +21,7 @@ public class DuckerConfiguration
 
     public DuckerConfiguration(
       final List<String> targetRuntimeClasspath,
-      final String targetJar,
+      final List<String> targetJar,
       final List<String> mixinSourcesClasspath,
       final List<String> extractionPackages,
       final IClassWriter classWriter,
@@ -43,7 +43,7 @@ public class DuckerConfiguration
         return targetRuntimeClasspath;
     }
 
-    public String getTargetJar()
+    public List<String> getTargetJars()
     {
         return targetJar;
     }

@@ -1,11 +1,7 @@
 package net.minecraftforge.ducker.mixin;
 
 import com.google.common.collect.Lists;
-import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import net.minecraftforge.ducker.configuration.DuckerConfiguration;
-import net.minecraftforge.ducker.mixin.classes.IClassProcessor;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.service.IMixinService;
 import org.spongepowered.asm.service.MixinService;
@@ -46,7 +42,7 @@ public class DuckerMixinBootstrap
     private static URL[] toFullUris(final DuckerConfiguration duckerConfiguration) {
         final List<URI> runtime = Lists.newArrayList();
         runtime.addAll(duckerConfiguration.getTargetRuntimeClasspath().stream().map(File::new).map(File::toURI).toList());
-        runtime.add(new File(duckerConfiguration.getTargetJar()).toURI());
+        runtime.addAll(duckerConfiguration.getTargetJars().stream().map(File::new).map(File::toURI).toList());
         runtime.addAll(duckerConfiguration.getMixinSourcesClasspath().stream().map(File::new).map(File::toURI).toList());
 
         return runtime.stream()
@@ -68,7 +64,7 @@ public class DuckerMixinBootstrap
     private static URL[] toRuntimeUris(final DuckerConfiguration duckerConfiguration) {
         final List<URI> runtime = Lists.newArrayList();
         runtime.addAll(duckerConfiguration.getTargetRuntimeClasspath().stream().map(File::new).map(File::toURI).toList());
-        runtime.add(new File(duckerConfiguration.getTargetJar()).toURI());
+        runtime.addAll(duckerConfiguration.getTargetJars().stream().map(File::new).map(File::toURI).toList());
 
         return runtime.stream()
           .map(uri -> {
