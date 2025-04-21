@@ -22,9 +22,9 @@ class ExecutorServiceTest
 
         final DuckerConfiguration configuration = new DuckerConfiguration(
                 Collections.emptyList(),
-                "src/test/resources/runtimes/" + name + " - Source/" + name + " - Source-1.0.jar",
+                Collections.singletonList("src/test/resources/runtimes/" + name + " - Source/" + name + " - Source-1.0.jar"),
                 Collections.singletonList("src/test/resources/runtimes/" + name + " - Mixin/" + name + " - Mixin-1.0.jar"),
-                "net.minecraftforge.ducker.digger",
+                Collections.singletonList("net.minecraftforge.ducker.digger"),
                 new SimpleClassWriter(output),
                 new ForgeFlowerBasedDecompiler(sources),
                 Lists.newLinkedList(

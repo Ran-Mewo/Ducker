@@ -45,6 +45,11 @@ public final class DuckerExecutor implements IClassBytecodeProvider {
 
     @Override
     public ClassNode getClassNode(String name, boolean runTransformers) throws ClassNotFoundException, IOException {
+        return this.getClassNode(name, runTransformers, ClassReader.EXPAND_FRAMES);
+    }
+
+    @Override
+    public ClassNode getClassNode(String name, boolean runTransformers, int readerFlags) throws ClassNotFoundException, IOException {
         if (!runTransformers) {
             throw new IllegalArgumentException("ModLauncher service does not currently support retrieval of untransformed bytecode");
         }
@@ -71,7 +76,7 @@ public final class DuckerExecutor implements IClassBytecodeProvider {
         if (classBytes != null && classBytes.length != 0) {
             ClassNode classNode = new ClassNode();
             ClassReader classReader = new MixinClassReader(classBytes, canonicalName);
-            classReader.accept(classNode, ClassReader.EXPAND_FRAMES);
+            classReader.accept(classNode, readerFlags);
             return classNode;
         }
 
