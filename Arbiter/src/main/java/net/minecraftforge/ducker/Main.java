@@ -11,12 +11,14 @@ import net.minecraftforge.ducker.decompile.forgeflower.ForgeFlowerBasedDecompile
 import net.minecraftforge.ducker.executor.ExecutorService;
 import net.minecraftforge.ducker.processor.FFBasedLineNumberFixer;
 import net.minecraftforge.ducker.transformers.AccessorDesynthesizerTransformer;
+import net.minecraftforge.ducker.transformers.AccessWidenerTransformer;
 import net.minecraftforge.ducker.transformers.ArgsClassStripper;
 import net.minecraftforge.ducker.transformers.IResultsTransformer;
 import net.minecraftforge.ducker.transformers.MixinAnnotationStripper;
 import net.minecraftforge.ducker.transformers.MixinMethodRemapperAndPrivatizer;
 import net.minecraftforge.ducker.transformers.OverwriteFixerTransformer;
 import net.minecraftforge.ducker.transformers.SourceMapStrippingTransformer;
+import net.minecraftforge.ducker.util.AccessWidenerUtil;
 import net.minecraftforge.ducker.writer.SimpleClassWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +79,12 @@ public class Main {
                 "Post-mixin transformers to run"
         ).withOptionalArg().ofType(Transformer.class);
 
+        final AbstractOptionSpec<File> accessWidenerOption = parser.acceptsAll(
+                        Lists.newArrayList("accesswidener", "aw"),
+                        "Access widener file(s) to apply. Can be specified multiple times.")
+                .withOptionalArg()
+                .ofType(File.class);
+
         final AbstractOptionSpec<String> classpath = parser.acceptsAll(List.of("classpath")).withRequiredArg();
 
         final OptionSet parsed = parser.parse(args);
@@ -84,12 +92,20 @@ public class Main {
         final List<File> target;
         final List<String> rootPackages;
         final List<File> mixin;
+        final List<File> accessWideners;
+        final List<Transformer> transformers;
         final File output;
         final Optional<File> sources;
         try {
             target = targetJarOption.values(parsed);
             rootPackages = targetPackageOption.values(parsed);
             mixin = parsed.valuesOf(mixinJarOption);
+            accessWideners = parsed.valuesOf(accessWidenerOption);
+            transformers = parsed.valuesOf(transformersOption);
+
+            if (!transformers.contains(Transformer.ACCESS_WIDENER) && !accessWideners.isEmpty()) {
+                transformers.add(Transformer.ACCESS_WIDENER);
+            }
 
             output = outputDirectoryOption.value(parsed);
             sources = parsed.has(sourcesDirectoryOption) ? Optional.of(sourcesDirectoryOption.value(parsed)) : Optional.empty();
@@ -137,10 +153,16 @@ public class Main {
                 classpath.values(parsed),
                 target.stream().map(File::getAbsolutePath).toList(),
                 mixin.stream().map(File::getAbsolutePath).toList(),
+                accessWideners.stream().map(File::getAbsolutePath).toList(),
                 rootPackages,
                 new SimpleClassWriter(output),
                 sources.map((Function<File, IDecompiler>) ForgeFlowerBasedDecompiler::new).orElse(NoopDecompiler.INSTANCE),
-                parsed.valuesOf(transformersOption).stream().map(Transformer::newTransformer).collect(Collectors.toCollection(LinkedList::new)),
+                transformers.stream().map(transformer -> {
+                    if (transformer == Transformer.ACCESS_WIDENER && !accessWideners.isEmpty()) {
+                        return transformer.newTransformer(accessWideners.stream().map(File::getAbsolutePath).toList());
+                    }
+                    return transformer.newTransformer();
+                }).collect(Collectors.toCollection(LinkedList::new)),
                 Lists.newLinkedList());
 
         try {
@@ -198,8 +220,20 @@ public class Main {
             public IResultsTransformer newTransformer() {
                 return new OverwriteFixerTransformer();
             }
+        },
+        ACCESS_WIDENER {
+            @Override
+            public IResultsTransformer newTransformer() {
+                return new AccessWidenerTransformer(AccessWidenerUtil.createAccessWidener(List.of()));
+            }
+
+            @Override
+            public IResultsTransformer newTransformer(List<String> accessWidenerFiles) {
+                return new AccessWidenerTransformer(AccessWidenerUtil.createAccessWidener(accessWidenerFiles));
+            }
         };
 
         public abstract IResultsTransformer newTransformer();
+        public IResultsTransformer newTransformer(List<String> accessWidenerFiles) { return newTransformer(); }
     }
 }

@@ -1,0 +1,13 @@
+accessWidener v1 named
+
+# This is a test access widener file
+# Format: <access modifier> <target> <class> <member name> <descriptor>
+
+# Make a class public
+accessible class net/minecraftforge/ducker/tests/SomeClass
+
+# Make a field public
+accessible field net/minecraftforge/ducker/tests/SomeClass privateField Ljava/lang/String;
+
+# Make a method public
+accessible method net/minecraftforge/ducker/tests/SomeClass privateMethod ()V

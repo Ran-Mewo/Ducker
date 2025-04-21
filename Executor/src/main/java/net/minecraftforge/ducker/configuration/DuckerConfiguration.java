@@ -13,6 +13,7 @@ public class DuckerConfiguration
     private final List<String> targetRuntimeClasspath;
     private final List<String> targetJar;
     private final List<String> mixinSourcesClasspath;
+    private final List<String> accessWidenerFiles;
     private final List<String> extractionPackages;
     private final IClassWriter classWriter;
     private final IDecompiler decompiler;
@@ -23,6 +24,7 @@ public class DuckerConfiguration
       final List<String> targetRuntimeClasspath,
       final List<String> targetJar,
       final List<String> mixinSourcesClasspath,
+      final List<String> accessWidenerFiles,
       final List<String> extractionPackages,
       final IClassWriter classWriter,
       final IDecompiler decompiler,
@@ -31,6 +33,7 @@ public class DuckerConfiguration
         this.targetRuntimeClasspath = targetRuntimeClasspath;
         this.targetJar = targetJar;
         this.mixinSourcesClasspath = mixinSourcesClasspath;
+        this.accessWidenerFiles = accessWidenerFiles;
         this.extractionPackages = extractionPackages;
         this.classWriter = classWriter;
         this.decompiler = decompiler;
@@ -51,6 +54,11 @@ public class DuckerConfiguration
     public List<String> getMixinSourcesClasspath()
     {
         return mixinSourcesClasspath;
+    }
+
+    public List<String> getAccessWidenerFiles()
+    {
+        return accessWidenerFiles;
     }
 
     public List<String> getExtractionPackages()

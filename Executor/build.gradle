@@ -11,6 +11,7 @@ configurations {
 dependencies {
     api "net.fabricmc:sponge-mixin:${project.mixin_version}"
     api "io.github.llamalad7:mixinextras-common:${project.mixin_extras_version}"
+    api "net.fabricmc:access-widener:${project.access_widener_version}"
 
     api "org.apache.logging.log4j:log4j-api:${project.log4j_version}"
     api "org.apache.logging.log4j:log4j-core:${project.log4j_version}"

@@ -27,6 +27,13 @@ public final class ExecutorService
 
     public void execute(final DuckerConfiguration duckerConfiguration)
     {
+        // Log access widener information if any are provided
+        if (!duckerConfiguration.getAccessWidenerFiles().isEmpty()) {
+            int count = duckerConfiguration.getAccessWidenerFiles().size();
+            LOGGER.info("Found {} access widener file{} to apply", count, count > 1 ? "s" : "");
+            duckerConfiguration.getAccessWidenerFiles().forEach(file -> LOGGER.info("Access widener file: {}", file));
+        }
+
         LOGGER.info("Bootstrapping mixin runtime");
         DuckerExecutorMixinService duckerExecutorMixinService = DuckerMixinBootstrap.bootstrapMixin(duckerConfiguration);
 
