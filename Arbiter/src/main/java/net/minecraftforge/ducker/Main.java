@@ -145,8 +145,8 @@ public class Main {
 
         ASM.getApiVersionMajor();
         setValue(ASM.class, "majorVersion", 9);
-        setValue(ASM.class, "minorVersion", 2);
-        setValue(ASM.class, "implMinorVersion", 2);
+        setValue(ASM.class, "minorVersion", 6);
+        setValue(ASM.class, "implMinorVersion", 0);
         setValue(ASM.class, "patchVersion", 0);
 
         final DuckerConfiguration configuration = new DuckerConfiguration(
